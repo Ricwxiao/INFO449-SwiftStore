@@ -8,25 +8,17 @@
 import Foundation
 
 protocol SKU {
-    var name : String {get}
+    var name : String { get }
     func price() -> Int
     
 }
 
 class Item: SKU {
-    var _name: String
-    var name: String {
-        get {
-            return self.name
-        }
-        set {
-            self.name = _name
-        }
-    }
-    var priceTag: Int
-    init(_ name: String, _ price: Int) {
-        _name = name
-        self.priceTag = price
+    var name: String
+    private var priceTag: Int
+    init(name: String, priceEach: Int) {
+        self.name = name
+        self.priceTag = priceEach
     }
     func price() -> Int {
         return self.priceTag
@@ -34,7 +26,7 @@ class Item: SKU {
 }
 
 class Receipt {
-    var itemList: [Item]
+    private var itemList: [Item]
     
     init(_ skuList: [Item]) {
         self.itemList = skuList
@@ -46,11 +38,28 @@ class Receipt {
     func items() -> [SKU] {
         return self.itemList
     }
-    func output() {
+    
+    func total() -> Int {
+        var sum = 0
         for item in self.itemList {
-            print(item.name)
+            sum += item.price()
         }
+        return sum
     }
+    
+    func output() -> String {
+        var shoppedList = ""
+        for item in self.itemList {
+            shoppedList += ("\n\(item.name): $\(Double(item.price()) / 100.0)")
+        }
+        let output = """
+Receipt:\(shoppedList)
+------------------
+TOTAL: $\(Double(self.total()) / 100.0)
+"""
+        return output
+    }
+    
     func add(_ item: Item) {
         self.itemList.append(item)
     }
@@ -65,8 +74,13 @@ class Register {
     func scan(_ item: Item) {
         receipt.add(item)
     }
-    func subtotal() {
-        return
+    func subtotal() -> Int {
+        return receipt.total()
+    }
+    func total() -> Receipt {
+        let tempReceipt = self.receipt
+        self.receipt = Receipt()
+        return tempReceipt
     }
 }
 
